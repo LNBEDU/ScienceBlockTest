@@ -3,7 +3,7 @@
  * ADS1115 External Sensor
  */
 
-//% color="#2f74ff" icon="\uf0e7" block="외부센서측정" weight=54
+//% color="#2f74ff" icon="\uf0e7" block="외부센서측정" weight=60
 namespace ExtraSensor {
 
     let adsAddress = 0x48
