@@ -59,7 +59,7 @@ enum RotateDirection {
 }
 
 
-//% color="#ff7f24" icon="\uf110" block="BlockNeo" weight=20
+//% color="#ff7f24" icon="\uf110" block="BlockNeo" weight=55
 namespace BlockNeo {
 
     
@@ -440,12 +440,10 @@ namespace BlockNeo {
         // 센서값 0~1023을 LED 개수 0~count로 변환
         let litCount = Math.floor(
             sensorVal * count / 1023
-        )
+        ) + 1
 
-        // 센서 최대값에서는 모든 LED 켜기
-        if (sensorVal >= 1023) {
-            litCount = count
-        }
+        // 혹시 모를 범위 초과 방지
+        litCount = clamp(litCount, 0, count)
 
         for (let i = 0; i < count; i++) {
 
