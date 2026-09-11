@@ -395,6 +395,95 @@ namespace ESP32UART {
         LCDGraph.drawStatus("TS SEND OK", Color.Green)
     }
 
+
+    /**
+ * 앱으로 센서 데이터 전송
+ */
+    //% block="앱으로 보내기 주소 $host 경로 $path 값1 $f1 값2 $f2 값3 $f3"
+    //% weight=85
+    export function appSend(
+        host: string,
+        path: string,
+        f1: number,
+        f2: number,
+        f3: number
+    ): void {
+
+        if (!wifiConnected) {
+            LCDGraph.drawStatus("WIFI NOT READY", Color.Red)
+            return
+        }
+
+        let body =
+            "{\"field1\":" + f1 +
+            ",\"field2\":" + f2 +
+            ",\"field3\":" + f3 +
+            "}"
+
+        let request =
+            "POST " + path + " HTTP/1.1\r\n" +
+            "Host: " + host + "\r\n" +
+            "User-Agent: ScienceBlock/1.0\r\n" +
+            "Connection: close\r\n" +
+            "Content-Type: application/json\r\n" +
+            "Content-Length: " + body.length + "\r\n" +
+            "\r\n" +
+            body
+
+        LCDGraph.drawStatus("APP CONNECT", Color.DarkGreen)
+
+        sendATWaitOK("AT+CIPCLOSE")
+        basic.pause(100)
+
+        lastLine = ""
+
+        serial.writeString(
+            "AT+CIPSTART=\"TCP\",\"" +
+            host +
+            "\",80\r\n"
+        )
+
+        if (!waitForConnectOrOK(5000)) {
+            serial.writeString("AT+CIPCLOSE\r\n")
+            LCDGraph.drawStatus("APP CONNECT FAIL", Color.Red)
+            return
+        }
+
+        basic.pause(50)
+
+        lastLine = ""
+
+        serial.writeString(
+            "AT+CIPSEND=" +
+            request.length +
+            "\r\n"
+        )
+
+        if (!waitForPrompt(3000)) {
+            serial.writeString("AT+CIPCLOSE\r\n")
+            LCDGraph.drawStatus("NO PROMPT", Color.Red)
+            return
+        }
+
+        serial.writeString(request)
+
+        if (!waitForSendOK(6000)) {
+            serial.writeString("AT+CIPCLOSE\r\n")
+            LCDGraph.drawStatus("APP SEND FAIL", Color.Red)
+            return
+        }
+
+        basic.pause(500)
+
+        serial.writeString("AT+CIPCLOSE\r\n")
+
+        LCDGraph.drawStatus("APP SEND OK", Color.Green)
+    }
+
+
+
+
+
     /**
      * 이름으로 블루투스 연결
      */
